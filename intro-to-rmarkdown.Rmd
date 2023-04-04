@@ -1,0 +1,71 @@
+---
+title: "Introduction to RMarkdown"
+date: "2023-04-03"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+bibliography: references.bib
+reference-section-title: References
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## This is a header
+
+-   This is **bold**
+
+-   This is *italic* ~~strikethrough~~
+
+-   
+
+    superscript^2^
+
+    :   subscript~2~
+
+# Header 1
+
+## Header 2
+
+# Adding links
+
+[Link to RMarkdown guide](https://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf)
+
+| Table Header | Second Header |
+|--------------|---------------|
+| Table Cell   | Cell 2        |
+| Cell 3       | Cell 4        |
+
+Adding citations
+
+This is an important fact [@oke2020]
+
+This is another important fact [@oke2020]
+
+## Adding tables
+
+| Col1   | Col2        | Col3 |
+|--------|-------------|------|
+| Item 1 | information |      |
+| Item 2 |             |      |
+|        |             |      |
+
+: This is an example
+
+# R Code chuncks 
+```{r example}
+hights_ft <- c(5.2, 6.0, 5.7)
+
+important_coef <- 3.14
+
+```
+
+## Exercise: new chunk
+
+```{r example1}
+mean(hights_ft)
+```
+
+
