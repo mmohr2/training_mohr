@@ -31,30 +31,6 @@ pika <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-
 elevation <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.268.1&entityid=6a10b35988119d0462837f9bfa31dd2f")
 ```
 
-## View Data
-
-```{r view data options}
-# view data in a spreadsheet-style viewer
-View(pika)
-
-# returns dimensions of the dataframe by number of rows and number of cols
-dim(pika)
-
-# returns the top six rows of the dataframe
-head(pika)
-
-# returns all the columns and some info about the cols
-glimpse(pika)
-
-# similar to glimpse but returns some summary statistics about the cols
-summary(pika)
-
-# returns column names 
-names(pika)
-
-# returns unique values in a column. In this case we can see all the different bird species IDs
-unique(pika$Site)
-```
 
 ## Clean and Wrangle Data
 
@@ -198,6 +174,7 @@ ggmap(nwt_basemap) +
 ```
 
 ## Make and interactive map using leaflet
+
 ```{r make and interactive map }
 leaflet() %>% 
   addTiles() %>% 
@@ -205,4 +182,3 @@ leaflet() %>%
 #### If you want to add more styling to your interactive map, review the leaflet sections in Intro to Data Viz, Using sf for Spatial Data & Intro to Map Making, or check out the leaflet cheatsheet. 
 ###### https://github.com/rstudio/cheatsheets/blob/main/leaflet.pdf
 ```
-
