@@ -1,5 +1,6 @@
 ---
 title: "Intro to sf package for spatial data and making maps"
+author: Michelle Mohr
 output: html_notebook
 ---
 
@@ -7,7 +8,196 @@ This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute
 
 Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
 
-```{r}
-plot(cars)
+```{r setup}
+
 ```
+
+
+## Load Libraries
+
+```{r}
+library(sf)
+library(ggplot2)
+library(leaflet)
+library(scales)
+library(ggmap) # base maps to static maps
+library(dplyr)
+library(readr)
+
+```
+
+## Explore AK Regions data
+
+```{r read ak regions data}
+ak_regions <- sf::read_sf("data/ak_regions_simp.shp")
+
+```
+
+```{r}
+plot(ak_regions)
+```
+```{r}
+head(ak_regions)
+```
+
+```{r}
+glimpse(ak_regions)
+```
+
+```{r}
+st_crs(ak_regions)
+```
+
+## Transform CRS of `ak_regions`
+
+```{r}
+ak_regions_3338 <- ak_regions %>% 
+  st_transform(crs = 3338)
+
+st_crs(ak_regions_3338)
+```
+
+```{r}
+plot(ak_regions_3338)
+```
+
+## sf & the tidyverse
+
+```{r}
+colnames(ak_regions_3338)
+```
+
+```{r}
+ak_regions_3338 %>% select(region)
+```
+```{r}
+ak_regions_3338 %>%  filter(region == "Yukon")
+```
+
+## Spatial Joins
+
+```{r}
+pop <- read_csv("data/alaska_population.csv")
+
+```
+
+```{r}
+pop_4326 <- st_as_sf(pop,
+                     coords = c("lng", "lat"), 
+                     crs = 4326,
+                     remove = FALSE)
+```
+
+```{r}
+pop_joined <- st_join(pop_4326, ak_regions_3338, join = st_within)
+```
+
+```{r}
+pop_3338 <- st_transform(pop_4326, crs = 3338)
+
+st_crs(pop_3338)
+```
+
+```{r}
+pop_joined <- st_join(pop_3338, ak_regions_3338, join = st_within)
+```
+
+
+
+```{r}
+pop_region <- pop_joined %>% 
+  as.data.frame() %>% 
+  group_by(region) %>% 
+  summarize(total_pop = sum(population))
+  
+head(pop_region)
+```
+
+
+```{r}
+pop_region_3338 <- left_join(ak_regions_3338, pop_region, by = "region")
+```
+
+```{r}
+plot(pop_region_3338["total_pop"])
+```
+
+```{r}
+pop_mgmt_3338 <- pop_region_3338 %>% 
+  group_by(mgmt_area) %>% 
+  summarize(total_pop = sum(total_pop), do_union = FALSE)
+
+head(pop_mgmt_3338)
+```
+```{r}
+plot(pop_mgmt_3338["total_pop"])
+```
+
+```{r}
+write_sf(pop_region_3338, "data/ak_regions_population.shp")
+```
+
+## Visualize with ggplot
+
+```{r}
+# add scale bar using `ggsn`
+ggplot(pop_region_3338) + 
+  geom_sf(aes(fill = log10(total_pop))) +
+  labs(fill = "Total Population") +
+  scale_fill_continuous(labels = comma, 
+                        low = "khaki",
+                        high = "firebrick") +
+theme_bw()
+```
+
+## Rivers spatial data
+
+```{r}
+
+rivers_3338<- read_sf("data/ak_rivers_simp.shp")
+# st_crs(rivers)
+```
+
+```{r}
+ggplot() +
+  geom_sf(pop_region_3338, mapping=aes(fill = log10(total_pop))) + 
+  geom_sf(pop_3338, mapping = aes(), color = "red4", size = 0.5) + 
+  geom_sf(rivers_3338, mapping=aes(linewidth = StrOrder)) +
+  scale_linewidth(range = c(0.05, 0.5), guide = "none") +
+  scale_fill_viridis_c(labels = comma) +
+labs(fill = "Total Population") +
+  theme_bw() +
+  ggtitle("Map of Alaska Population") +
+  theme(
+    plot.title = element_text(hjust = 0.5))
+  
+
+```
+
+## Leaflet interactive map
+
+```{r}
+epsg3338 <- leaflet::leafletCRS(
+    crsClass = "L.Proj.CRS",
+    code = "EPSG:3338",
+    proj4def =  "+proj=aea +lat_1=55 +lat_2=65 +lat_0=50 +lon_0=-154 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+    resolutions = 2 ^ (16:7)
+)
+```
+
+
+```{r}
+pop_region_4326 <- pop_region_3338 %>%  st_transform(crs = 4326)
+```
+
+```{r}
+m <- leaflet(options = leafletOptions(crs = epsg3338)) %>% 
+  addPolygons(data = pop_region_4326,
+              fillColor = "green",
+              weight = 2,
+              fillOpacity = 5)
+m
+```
+
+
 
