@@ -1,0 +1,107 @@
+---
+title: 'R Practice: Spatial Data and Making Maps'
+author: "Michelle Mohr"
+date: "2023-04-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load Libraries
+
+```{r load libraries}
+library(readr)
+library(dplyr)
+library(sf)
+library(ggplot2)
+library(scales)
+library(leaflet)
+library(ggmap)
+
+```
+
+## Download Data
+
+```{r download data}
+read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.268.1&entityid=43270add3532c7f3716404576cfb3f2c")
+read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.268.1&entityid=6a10b35988119d0462837f9bfa31dd2f")
+```
+
+## Read Data
+
+```{r read data}
+pika <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.268.1&entityid=43270add3532c7f3716404576cfb3f2c")
+elevation <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.268.1&entityid=6a10b35988119d0462837f9bfa31dd2f")
+```
+
+## View Data
+
+```{r view data options}
+# view data in a spreadsheet-style viewer
+View(pika)
+
+# returns dimensions of the dataframe by number of rows and number of cols
+dim(pika)
+
+# returns the top six rows of the dataframe
+head(pika)
+
+# returns all the columns and some info about the cols
+glimpse(pika)
+
+# similar to glimpse but returns some summary statistics about the cols
+summary(pika)
+
+# returns column names 
+names(pika)
+
+# returns unique values in a column. In this case we can see all the different bird species IDs
+unique(pika$Site)
+```
+
+## Clean and Wrangle Data
+
+### Clean and Wrangle Pika Data
+
+```{r remove columns}
+pika_clean <- pika %>% 
+  select(-Notes,
+         -Vial,
+         -Plate,
+         -Biweek)
+#### by using - we remove those columns 
+```
+
+```{r convert data types}
+pika_clean <- pika_clean %>% 
+  mutate(Station = as.factor(Station),
+         Site = as.factor(Site),
+         Sex = as.factor(Sex)
+         )
+### by using as.factor we change the class from character to a factor
+```
+
+```{r spell out the abbreviations in Site}
+pika_clean <- pika_clean %>% 
+  mutate(Site = recode(
+    Site,
+    "CG" = "Cable Gate",
+    "WK" = "West Knoll",
+    "LL" = "Long Lake"
+  ))
+## by using mutate, we can change the names within the character
+```
+
+```{r reorganizing columns to be next to eachother}
+pika_clean <- pika_clean %>%  
+  relocate(Site, .before = Station) %>% 
+  relocate(Sex, .after = UTM_Northing)
+## by using relocate, we can move columns around in our data table 
+```
+
+
+
+
+
