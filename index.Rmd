@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Practice session
 - Joins
 - Visualizing Data
-- Wrangling and Maps
+- [Wrangling and Maps](r-practice-spatial-data-maps.html)
 
 ## Additional Resources 
 [Great website example](https://emp-des.github.io/emp-reports/cwq-report.html)
